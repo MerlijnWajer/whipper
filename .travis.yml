@@ -27,5 +27,9 @@ install:
     # Installing
     - sudo make install
 
+    # Check flacenc availability
+    - sudo apt-get install -qq gstreamer0.10-tools
+    - gst-inspect-0.10 flacenc
+
 script:
     - python -m unittest discover
