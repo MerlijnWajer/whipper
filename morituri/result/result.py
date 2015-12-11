@@ -43,12 +43,25 @@ class TrackResult:
                              track.
     @type ARCRC:             int
 
+    @var  ARCRC_V2:          our calculated 4 byte AccurateRip CRC for this
+                             track. (AccurateRip version 2)
+    @type ARCRC_V2:          int
+
     @var  ARDBCRC:           the 4-byte AccurateRip CRC this
                              track did or should have matched in the database.
                              If None, the track is not in the database.
     @type ARDBCRC:           int
+
+    @var  ARDBCRC_V2:        the 4-byte AccurateRip CRC (V2) this
+                             track did or should have matched in the database.
+                             If None, the track is not in the database.
+    @type ARDBCRC_V2:        int
+
     @var  ARDBConfidence:    confidence for the matched AccurateRip CRC for
                              this track in the database.
+                             If None, the track is not in the database.
+    @var  ARDBConfidence_V2: confidence for the matched AccurateRip CRC (V2)
+                             for this track in the database.
                              If None, the track is not in the database.
     @var  ARDBMaxConfidence: maximum confidence in the AccurateRip database for
                              this track; can still be 0.
@@ -68,8 +81,11 @@ class TrackResult:
     copycrc = None
     accurip = False # whether it's in the database
     ARCRC = None
+    ARCRC_V2 = None
     ARDBCRC = None
+    ARDBCRC_V2 = None
     ARDBConfidence = None
+    ARDBConfidence_V2 = None
     ARDBMaxConfidence = None
 
     classVersion = 3
