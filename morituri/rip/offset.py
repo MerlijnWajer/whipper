@@ -207,6 +207,7 @@ CD in the AccurateRip database."""
         self.stdout.write('No matching offset found.\n')
         self.stdout.write('Consider trying again with a different disc.\n')
 
+    # TODO MW: Update this further for ARv2 code
     def _arcs(self, runner, table, track, offset):
         # rips the track with the given offset, return the arcs checksum
         self.debug('Ripping track %r with offset %d ...', track, offset)
@@ -226,8 +227,8 @@ CD in the AccurateRip database."""
         # here to avoid import gst eating our options
         from morituri.common import checksum
 
-        t = checksum.AccurateRipChecksumTask(path, trackNumber=track,
-            trackCount=len(table.tracks))
+        t = checksum.FastAccurateRipChecksumTask(path, trackNumber=track,
+            trackCount=len(table.tracks), wave=True)
         runner.run(t)
 
         os.unlink(path)
