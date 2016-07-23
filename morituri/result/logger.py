@@ -158,21 +158,51 @@ class MorituriLogger(result.Logger):
         if trackResult.copycrc is not None:
             lines.append("    Copy CRC: %08X" % trackResult.copycrc)
         if trackResult.accurip:
-            lines.append("    AccurateRip V1:")
-            self._inARDatabase += 1
-            if trackResult.ARCRC == trackResult.ARDBCRC:
-                lines.append("      Result: Found, exact match")
-                self._accuratelyRipped += 1
+            # If we make it here, either ARDBConfidence or
+            # ARDBConfidence_V2 is set.
+
+            if trackResult.ARDBConfidence:
+                lines.append('  Accurately ripped (confidence %d) [%08X] (V1)' % (
+                    trackResult.ARDBConfidence, trackResult.ARCRC))
             else:
-                lines.append("      Result: Found, NO exact match")
-            lines.append("      Confidence: %d" %
-                         trackResult.ARDBConfidence)
-            lines.append("      Local CRC: %08X" % trackResult.ARCRC)
-            lines.append("      Remote CRC: %08X" % trackResult.ARDBCRC)
-        elif trackResult.number != 0:
-            lines.append("    AccurateRip V1:")
-            lines.append("      Result: Track not present in "
-                         "AccurateRip database")
+                lines.append('  Possibly Accurately ripped [%08X] (V1)' % (
+                    trackResult.ARCRC))
+
+            if trackResult.ARDBConfidence_V2:
+                lines.append('  Accurately ripped (confidence %d) [%08X] (V2)' % (
+                    trackResult.ARDBConfidence_V2, trackResult.ARCRC_V2))
+            else:
+                lines.append('  Possibly Accurately ripped [%08X] (V2)' % (
+                    trackResult.ARCRC_V2))
+
+            #lines.append("    AccurateRip V1:")
+            #self._inARDatabase += 1
+            #if trackResult.ARCRC == trackResult.ARDBCRC:
+            #    lines.append("      Result: Found, exact match")
+            #    self._accuratelyRipped += 1
+            #else:
+            #    lines.append("      Result: Found, NO exact match")
+            #lines.append("      Confidence: %d" %
+            #             trackResult.ARDBConfidence)
+            #lines.append("      Local CRC: %08X" % trackResult.ARCRC)
+            #lines.append("      Remote CRC: %08X" % trackResult.ARDBCRC)
+
+        else:
+            # If the rip is not verified as accurate, we set ARDBCRC to whatever
+            # checksum is in the DB with the highest confidence - we don't know
+            # if they are V1 or V2.
+            if trackResult.ARDBCRC:
+                lines.append('  Cannot be verified as accurate '
+                             'V1 [%08X] V2 [%08X], AccurateRip returned [%08X] (V1 or V2)' % (
+                        trackResult.ARCRC, trackResult.ARCRC_V2, trackResult.ARDBCRC))
+
+            if not trackResult.ARDBCRC:
+                lines.append('  Track not present in AccurateRip database')
+
+        # TODO MW: There are hidden tracks on other places as well, presumably ???
+        #elif trackResult.number != 0:
+        #    lines.append("    AccurateRip V1:")
+        #    lines.append("      Result: Track not present in "
 
         if trackResult.testcrc == trackResult.copycrc:
             lines.append("    Status: Copy OK")
