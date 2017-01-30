@@ -39,15 +39,29 @@ class TrackResult:
                              the database, ...
     @type accurip:           bool
 
-    @var  ARCRC:             our calculated 4 byte AccurateRip CRC for this
+    @var  ARCRC_v1:          our calculated 4 byte AccurateRip CRC for this
                              track.
-    @type ARCRC:             int
+    @type ARCRC_v1:          int
 
-    @var  ARDBCRC:           the 4-byte AccurateRip CRC this
+    @var  ARCRC_v2:          our calculated 4 byte AccurateRip CRC for this
+                             track.
+    @type ARCRC_v2:          int
+
+
+    @var  ARDBCRC_v1:        the 4-byte AccurateRip CRC this
                              track did or should have matched in the database.
                              If None, the track is not in the database.
-    @type ARDBCRC:           int
-    @var  ARDBConfidence:    confidence for the matched AccurateRip CRC for
+    @type ARDBCRC_v1:        int
+
+    @var  ARDBCRC_v2:        the 4-byte AccurateRip CRC this
+                             track did or should have matched in the database.
+                             If None, the track is not in the database.
+    @type ARDBCRC_v2:        int
+
+    @var  ARDBConfidence_v1: confidence for the matched AccurateRip CRC for
+                             this track in the database.
+                             If None, the track is not in the database.
+    @var  ARDBConfidence_v2: confidence for the matched AccurateRip CRC for
                              this track in the database.
                              If None, the track is not in the database.
     @var  ARDBMaxConfidence: maximum confidence in the AccurateRip database for
@@ -67,9 +81,12 @@ class TrackResult:
     testcrc = None
     copycrc = None
     accurip = False # whether it's in the database
-    ARCRC = None
-    ARDBCRC = None
-    ARDBConfidence = None
+    ARCRC_v1 = None
+    ARCRC_v2 = None
+    ARDBCRC_v1 = None
+    ARDBCRC_v2 = None
+    ARDBConfidence_v1 = None
+    ARDBConfidence_v2 = None
     ARDBMaxConfidence = None
 
     classVersion = 3

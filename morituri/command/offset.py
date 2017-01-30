@@ -155,8 +155,10 @@ CD in the AccurateRip database."""
 
             logger.debug('AR checksum calculated: %s' % archecksum)
 
-            c, i = match(archecksum, 1, responses)
-            if c:
+            c, i = match(archecksums['v1'], 1, responses)
+            c2, i2 = match(archecksums['v2'], 1, responses)
+
+            if c or c2:
                 count = 1
                 logger.debug('MATCHED against response %d' % i)
                 sys.stdout.write(
@@ -167,7 +169,7 @@ CD in the AccurateRip database."""
                 # last one (to avoid readers that can't do overread
                 for track in range(2, (len(table.tracks) + 1) - 1):
                     try:
-                        archecksum = self._arcs(runner, table, track, offset)
+                        archecksums = self._arcs(runner, table, track, offset)
                     except task.TaskException, e:
                         if isinstance(e.exception, cdparanoia.FileSizeError):
                             sys.stdout.write(
@@ -175,8 +177,9 @@ CD in the AccurateRip database."""
                                 offset)
                             continue
 
-                    c, i = match(archecksum, track, responses)
-                    if c:
+                    c, i = match(archecksums['v1'], track, responses)
+                    c2, i2 = match(archecksum['v2'], track, responses)
+                    if c or c2:
                         logger.debug('MATCHED track %d against response %d' % (
                             track, i))
                         count += 1
@@ -212,13 +215,16 @@ CD in the AccurateRip database."""
         # here to avoid import gst eating our options
         from morituri.common import checksum
 
-        # TODO MW: Update this to also use the v2 checksum(s)
         t = checksum.FastAccurateRipChecksumTask(path, trackNumber=track,
             trackCount=len(table.tracks), wave=True, v2=False)
         runner.run(t)
+        t2 = checksum.FastAccurateRipChecksumTask(path, trackNumber=track,
+            trackCount=len(table.tracks), wave=True, v2=True)
+        runner.run(t)
+        runner.run(t2)
 
         os.unlink(path)
-        return "%08x" % t.checksum
+        return {'v1': "%08x" % t.checksum, 'v2': "%08x" % t2.checksum}
 
     def _foundOffset(self, device, offset):
         sys.stdout.write('\nRead offset of device is: %d.\n' %

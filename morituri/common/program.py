@@ -594,7 +594,8 @@ class Program:
         # loop over tracks to set our calculated AccurateRip CRC's
         for i, csum in enumerate(checksums):
             trackResult = self.result.getTrackResult(i + 1)
-            trackResult.ARCRC = csum
+            trackResult.ARCRC_v1 = csum['v1']
+            trackResult.ARCRC_v2 = csum['v2']
 
 
         if not responses:
@@ -604,24 +605,40 @@ class Program:
         # now loop to match responses
         for i, csum in enumerate(checksums):
             trackResult = self.result.getTrackResult(i + 1)
+            csum_v1 = csum['v1']
+            csum_v2 = csum['v2']
 
             confidence = None
             response = None
 
             # match against each response's checksum for this track
             for j, r in enumerate(responses):
-                if "%08x" % csum == r.checksums[i]:
+                if "%08x" % csum_v1 == r.checksums[i]:
                     response = r
                     logger.debug(
-                        "Track %02d matched response %d of %d in "
+                        "Track %02d matched (with V1) response %d of %d in "
                         "AccurateRip database",
                         i + 1, j + 1, len(responses))
                     trackResult.accurip = True
                     # FIXME: maybe checksums should be ints
-                    trackResult.ARDBCRC = int(r.checksums[i], 16)
+                    trackResult.ARDBCRC_v1 = int(r.checksums[i], 16)
                     # arsum = csum
                     confidence = r.confidences[i]
-                    trackResult.ARDBConfidence = confidence
+                    trackResult.ARDBConfidence_v1 = confidence
+
+                if "%08x" % csum_v2 == r.checksums[i]:
+                    response = r
+                    logger.debug(
+                        "Track %02d matched (with V2) response %d of %d in "
+                        "AccurateRip database",
+                        i + 1, j + 1, len(responses))
+                    trackResult.accurip = True
+                    # FIXME: maybe checksums should be ints
+                    # XXX: Wizzup: We may override a previous ARDBCRC if bothexist
+                    trackResult.ARDBCRC_v2 = int(r.checksums[i], 16)
+                    # arsum = csum
+                    confidence = r.confidences[i]
+                    trackResult.ARDBConfidence_v2 = confidence
 
             if not trackResult.accurip:
                 logger.warning("Track %02d: not matched in AccurateRip database",
@@ -642,10 +659,16 @@ class Program:
             if not response:
                 logger.warning('Track %02d: none of the responses matched.',
                     i + 1)
-                trackResult.ARDBCRC = int(
+                # TODO: We cannot know if it is v1 or v2. Just set both?
+                # XXX: This needs more thought.
+                trackResult.ARDBCRC_v1 = int(
                     maxResponse.checksums[i], 16)
-            else:
-                trackResult.ARDBCRC = int(response.checksums[i], 16)
+                trackResult.ARDBCRC_v2 = int(
+                    maxResponse.checksums[i], 16)
+
+            # XXX Wizzup: We are already setting it above
+            #else:
+            #    trackResult.ARDBCRC = int(response.checksums[i], 16)
 
     # TODO MW: Update this further for ARv2 code
     def getAccurateRipResults(self):
@@ -672,16 +695,18 @@ class Program:
                             trackResult.ARDBConfidence,
                             trackResult.ARDBMaxConfidence)
 
-                ar = ", DB [%08x]" % trackResult.ARDBCRC
+                ar = ", DBv1 [%08x] DBv2 [%08x]" % (trackResult.ARDBCRC_v1,
+                                                    trackResult.ARDBCRC_v2)
             # htoa tracks (i == 0) do not have an ARCRC
-            if trackResult.ARCRC is None:
+            if trackResult.ARCRC_v1 is None and trackResult.ARCRC_v2 is None:
                 assert trackResult.number == 0, \
                     'no trackResult.ARCRC on non-HTOA track %d' % \
                         trackResult.number
                 res.append("Track  0: unknown          (not tracked)")
             else:
-                res.append("Track %2d: %s %s [%08x]%s" % (
-                    trackResult.number, status, c, trackResult.ARCRC, ar))
+                res.append("Track %2d: %s %s [%08x, %08x] %s" % (
+                    trackResult.number, status, c, trackResult.ARCRC_v1,
+                    trackResult.ARCRC_v2 ar))
 
         return res
 

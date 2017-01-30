@@ -140,12 +140,16 @@ class AccurateRipChecksumTask(task.MultiSeparateTask):
 
             checksumTask = checksum.FastAccurateRipChecksumTask(path,
                 trackNumber=trackIndex + 1, trackCount=len(cue.table.tracks),
-                wave=True, v2=False)
+                wave=False, v2=False)
+            checksumTask = checksum.FastAccurateRipChecksumTask(path,
+                trackNumber=trackIndex + 1, trackCount=len(cue.table.tracks),
+                wave=False, v2=True)
 
             self.addTask(checksumTask)
 
     def stop(self):
-        self.checksums = [t.checksum for t in self.tasks]
+        results = [t.checksum for t in self.tasks]
+        self.checksums = [{'v1': x, 'v2': y} for x, y in zip(results[::2], results[1::2])]
         task.MultiSeparateTask.stop(self)
 
 
