@@ -304,6 +304,7 @@ class Program:
                 metadatas = mbngs.musicbrainz(mbdiscid,
                     country=country,
                     record=self._record)
+                break
             except mbngs.NotFoundException, e:
                 break
             except musicbrainzngs.NetworkError, e:
@@ -460,7 +461,8 @@ class Program:
         tags['TRACKNUMBER'] = u'%s' % number
 
         if self.metadata:
-            tags['DATE'] = self.metadata.release
+            if self.metadata.release is not None:
+                tags['DATE'] = self.metadata.release
 
             if number > 0:
                 tags['MUSICBRAINZ_TRACKID'] = mbidTrack
@@ -515,8 +517,6 @@ class Program:
 
         @param trackResult: the object to store information in.
         @type  trackResult: L{result.TrackResult}
-        @param number:      track number (1-based)
-        @type  number:      int
         """
         if trackResult.number == 0:
             start, stop = self.getHTOA()
