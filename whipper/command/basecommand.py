@@ -63,6 +63,15 @@ class BaseCommand():
                                      help=argparse.SUPPRESS)
 
         if self.device_option:
+            self.parser.add_argument('-d', '--device',
+                                     action="store",
+                                     dest="device",
+                                     default=None,
+                                     help="CD-DA device")
+
+        self.options = self.parser.parse_args(argv, namespace=opts)
+
+        if self.device_option and not self.options.device:
             # pick the first drive as default
             drives = drive.getAllDevicePaths()
             if not drives:
@@ -70,13 +79,7 @@ class BaseCommand():
                 logger.critical(msg)
                 # whipper exited with return code 3 here
                 raise IOError(msg)
-            self.parser.add_argument('-d', '--device',
-                                     action="store",
-                                     dest="device",
-                                     default=drives[0],
-                                     help="CD-DA device")
-
-        self.options = self.parser.parse_args(argv, namespace=opts)
+            self.options.device = drives[0]
 
         if self.device_option:
             # this can be a symlink to another device
